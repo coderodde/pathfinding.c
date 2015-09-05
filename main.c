@@ -244,8 +244,8 @@ static void test_dijkstra_correctness()
     ASSERT(list_t_get(p_path, 6) == p_node_t);
 }
 
-static const size_t NODES = 100;
-static const size_t EDGES = NODES * 10;
+static const size_t NODES = 20000;
+static const size_t EDGES = NODES * 4;
 static const double MAXX = 1000.0;
 static const double MAXY = 500.0;
 static const double MAXZ = 100.0;
@@ -266,7 +266,7 @@ int main(int argc, char** argv) {
     
     test_directed_graph_node_correctness();
     test_weight_function_correctness();
-//    test_dijkstra_correctness();
+    test_dijkstra_correctness();
     
     c = clock();
     p_data = create_random_graph(NODES, EDGES, MAXX, MAXY, MAXZ);
@@ -294,6 +294,9 @@ int main(int argc, char** argv) {
         puts(directed_graph_node_t_to_string(list_t_get(p_path, i)));
     }
     
+    printf("Path is a valid path: %d\n", is_valid_path(p_path));
+    printf("Path cost: %f\n", 
+           compute_path_cost(p_path, p_data->p_weight_function));
     return (EXIT_SUCCESS);
 }
 

@@ -143,3 +143,47 @@ list_t* traceback_path(directed_graph_node_t* p_target,
 
     return p_ret;
 }
+
+bool is_valid_path(list_t* p_path)
+{
+    size_t i;
+    size_t sz;
+    
+    if (!p_path) return false;
+    
+    /* A empty path is defined to be valid. */
+    if ((sz = list_t_size(p_path)) == 0) return true;
+    
+    for (i = 0; i < sz - 1; ++i) 
+    {
+        if (!directed_graph_node_t_has_child(list_t_get(p_path, i),
+                                             list_t_get(p_path, i + 1))) 
+        {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+double compute_path_cost(list_t* p_path, 
+                         directed_graph_weight_function_t* p_weight_function)
+{
+    size_t i;
+    size_t sz;
+    double cost = 0.0;
+    
+    if (!p_path) return 0.0;
+    
+    /* A empty path is defined to be valid. */
+    if ((sz = list_t_size(p_path)) == 0) return 0.0;
+    
+    for (i = 0; i < sz - 1; ++i) 
+    {
+        cost += *directed_graph_weight_function_t_get(p_weight_function,
+                                                      list_t_get(p_path, i),
+                                                      list_t_get(p_path, i + 1));
+    }
+    
+    return cost;
+}

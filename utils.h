@@ -38,6 +38,11 @@ extern "C" {
     list_t* traceback_path(directed_graph_node_t* p_target,
                            unordered_map_t* p_parent_map);
     
+    bool is_valid_path(list_t* p_path);
+    
+    double compute_path_cost(
+    list_t* p_path, directed_graph_weight_function_t* p_weight_function);
+    
 #ifdef	__cplusplus
 }
 #endif
