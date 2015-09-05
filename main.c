@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include "dijkstra.h"
 #include "directed_graph_node.h"
 #include "weight_function.h"
 #include "utils.h"
@@ -159,6 +160,11 @@ static void test_weight_function_correctness()
     directed_graph_weight_function_t_free(p_weight_function);
 }
 
+static void test_dijkstra_correctness()
+{
+    
+}
+
 static const size_t NODES = 100;
 static const size_t EDGES = NODES * 5;
 static const double MAXX = 1000.0;
@@ -171,7 +177,12 @@ int main(int argc, char** argv) {
     int           seed = time(NULL);
     double        duration = 0.0;
     
+    directed_graph_node_t* p_source;
+    directed_graph_node_t* p_target;
+    
+    printf("%d\n", sizeof(void*));
     printf("Seed: %d\n", seed);
+    srand(seed);
     
     test_directed_graph_node_correctness();
     test_weight_function_correctness();
@@ -180,7 +191,16 @@ int main(int argc, char** argv) {
     p_data = create_random_graph(NODES, EDGES, MAXX, MAXY, MAXZ);
     
     duration += ((double) clock() - c);
-    printf("Built the graph in %f seconds.", duration / CLOCKS_PER_SEC);
+    printf("Built the graph in %f seconds.\n", duration / CLOCKS_PER_SEC);
+    
+    p_source = choose(p_data->p_node_array, NODES);
+    p_target = choose(p_data->p_node_array, NODES);
+    
+    printf("Source: %s\n", directed_graph_node_t_to_string(p_source));
+    printf("Target: %s\n", directed_graph_node_t_to_string(p_target));
+    
+    dijkstra(p_source, p_target, p_data->p_weight_function);
+    
     return (EXIT_SUCCESS);
 }
 
