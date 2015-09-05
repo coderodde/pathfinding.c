@@ -2,6 +2,7 @@
 #include "unordered_map.h"
 #include "utils.h"
 #include "list.h"
+#include <math.h>
 
 point_3d_t* random_point(double maxx, double maxy, double maxz) 
 {
@@ -39,7 +40,7 @@ graph_data_t* create_random_graph(const size_t nodes,
                                   const double maxz)
 {
     size_t i;
-    char text[80];
+    char* p_name;
 
     directed_graph_node_t*              p_tail;
     directed_graph_node_t*              p_head;
@@ -84,26 +85,31 @@ graph_data_t* create_random_graph(const size_t nodes,
 
     for (i = 0; i < nodes; ++i) 
     {
-        sprintf(text, "%d", i);
-        p_node_array[i] = directed_graph_node_t_alloc(text);
+        p_name = malloc(sizeof(char) * 20);
+        sprintf(p_name, "%d", i);
+        p_node_array[i] = directed_graph_node_t_alloc(p_name);
+//        printf("%s\n", directed_graph_node_t_to_string(p_node_array[i]));
         unordered_map_t_put(p_point_map, 
                             p_node_array[i], 
                             random_point(maxx, maxy, maxz));
     }
+    
     while (edges > 0)
     {
         p_tail = choose(p_node_array, nodes);
         p_head = choose(p_node_array, nodes);
-
+        
         p_a = unordered_map_t_get(p_point_map, p_tail);
         p_b = unordered_map_t_get(p_point_map, p_head);
 
+        directed_graph_node_t_add_arc(p_tail, p_head);
+        
         directed_graph_weight_function_t_put(
                 p_weight_function,
                 p_tail,
                 p_head,
                 1.2 * point_3d_t_distance(p_a, p_b));
-
+        
         --edges;
     }
 

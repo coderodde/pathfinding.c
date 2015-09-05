@@ -44,7 +44,7 @@ size_t hash_function(void* v)
     return ret;
 }
 
-static const size_t MAXIMUM_NAME_LENGTH = 40;
+static const size_t MAXIMUM_NAME_LENGTH = 80;
 
 directed_graph_node_t* directed_graph_node_t_alloc(char* name)
 {
@@ -53,8 +53,8 @@ directed_graph_node_t* directed_graph_node_t_alloc(char* name)
     
     if (!p_node) return NULL;
     
-    p_node->p_name = malloc(sizeof(char) * MAXIMUM_NAME_LENGTH);
-    strcpy(p_node->p_name, name);
+    p_node->p_name = name;
+    
     p_text = malloc(sizeof(char) * MAXIMUM_NAME_STRING_LEN); 
     
     if (!p_text)
