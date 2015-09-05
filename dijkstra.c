@@ -48,6 +48,7 @@ list_t* dijkstra(directed_graph_node_t* p_source,
     unordered_set_iterator_t* p_child_iterator;
     weight_t*                 p_weight;
     list_t*                   p_weight_list;
+    size_t                    i;
     
     if (!p_source)          return NULL;
     if (!p_target)          return NULL;
@@ -126,8 +127,6 @@ list_t* dijkstra(directed_graph_node_t* p_source,
         
         if (equals_function(p_current, p_target)) 
         {
-            puts("POOP BETWEEN TWO NODES! ^^");
-            
             p_list = traceback_path(p_target, p_parent_map);
             heap_t_free(p_open_set);
             unordered_set_t_free(p_closed_set);
@@ -168,7 +167,9 @@ list_t* dijkstra(directed_graph_node_t* p_source,
                 unordered_map_t_put(p_parent_map, p_child, p_current);
                 unordered_map_t_put(p_cost_map, p_child, p_weight);
             }
-            else if (tmp_cost < ((weight_t*) unordered_map_t_get(p_cost_map, p_child))->weight)
+            else if (tmp_cost < 
+                    ((weight_t*) unordered_map_t_get(p_cost_map, 
+                                                     p_child))->weight)
             {
                 p_weight = malloc(sizeof(*p_weight));
                 p_weight->weight = tmp_cost;
@@ -184,11 +185,17 @@ list_t* dijkstra(directed_graph_node_t* p_source,
     
     /* Once here, return a empty path in order to denote the fact that the 
        target node is not reachable from source node. */
-    puts("NOPOOOP");
     heap_t_free(p_open_set);
     unordered_set_t_free(p_closed_set);
     unordered_map_t_free(p_parent_map);
     unordered_map_t_free(p_cost_map);
     p_list = list_t_alloc(10);
+    
+    /* Deallocate the weights. */
+    for (i = 0; i < list_t_size(p_weight_list); ++i) 
+    {
+        free(list_t_get(p_weight_list, i));
+    }
+    
     return p_list;
 }

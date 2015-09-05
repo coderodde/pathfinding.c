@@ -124,6 +124,9 @@ list_t* traceback_path(directed_graph_node_t* p_target,
     if (!p_parent_map) return NULL;
 
     p_ret = list_t_alloc(10);
+    
+    if (!p_ret)        return NULL;
+    
     p_current = p_target;
 
     while (p_current) 

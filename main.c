@@ -234,10 +234,17 @@ static void test_dijkstra_correctness()
     
     p_path = dijkstra(p_node_s, p_node_t, p_weight_function);
     
-    printf("Path nodes: %d\n", list_t_size(p_path));
+    ASSERT(list_t_size(p_path) == 7);
+    ASSERT(list_t_get(p_path, 0) == p_node_s);
+    ASSERT(list_t_get(p_path, 1) == p_node_a);
+    ASSERT(list_t_get(p_path, 2) == p_node_b);
+    ASSERT(list_t_get(p_path, 3) == p_node_c);
+    ASSERT(list_t_get(p_path, 4) == p_node_d);
+    ASSERT(list_t_get(p_path, 5) == p_node_e);
+    ASSERT(list_t_get(p_path, 6) == p_node_t);
 }
 
-static const size_t NODES = 100;
+static const size_t NODES = 10000;
 static const size_t EDGES = NODES * 5;
 static const double MAXX = 1000.0;
 static const double MAXY = 500.0;
@@ -247,12 +254,13 @@ int main(int argc, char** argv) {
     graph_data_t* p_data;
     clock_t       c;
     int           seed = time(NULL);
-    double        duration = 0.0;
+    double        duration;
+    list_t*       p_path;
+    size_t        i;
     
     directed_graph_node_t* p_source;
     directed_graph_node_t* p_target;
     
-    printf("%d\n", sizeof(void*));
     printf("Seed: %d\n", seed);
     srand(seed);
     
@@ -263,7 +271,7 @@ int main(int argc, char** argv) {
     c = clock();
     p_data = create_random_graph(NODES, EDGES, MAXX, MAXY, MAXZ);
     
-    duration += ((double) clock() - c);
+    duration = ((double) clock() - c);
     printf("Built the graph in %f seconds.\n", duration / CLOCKS_PER_SEC);
     
     p_source = choose(p_data->p_node_array, NODES);
@@ -272,7 +280,19 @@ int main(int argc, char** argv) {
     printf("Source: %s\n", directed_graph_node_t_to_string(p_source));
     printf("Target: %s\n", directed_graph_node_t_to_string(p_target));
     
-    dijkstra(p_source, p_target, p_data->p_weight_function);
+    c = clock();
+    
+    p_path = dijkstra(p_source, p_target, p_data->p_weight_function);
+    
+    duration = ((double) clock() - c);
+    
+    printf("Dijkstra's algorithm in %f seconds.\n", duration / CLOCKS_PER_SEC);
+    printf("Path:\n");
+    
+    for (i = 0; i < list_t_size(p_path); ++i) 
+    {
+        puts(directed_graph_node_t_to_string(list_t_get(p_path, i)));
+    }
     
     return (EXIT_SUCCESS);
 }
