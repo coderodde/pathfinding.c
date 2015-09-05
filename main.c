@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "directed_graph_node.h"
 #include "weight_function.h"
+#include "utils.h"
 
 #define ASSERT(CONDITION) assert(CONDITION, #CONDITION, __FILE__, __LINE__)
 
@@ -157,9 +159,28 @@ static void test_weight_function_correctness()
     directed_graph_weight_function_t_free(p_weight_function);
 }
 
+static const size_t NODES = 100;
+static const size_t EDGES = NODES * 5;
+static const double MAXX = 1000.0;
+static const double MAXY = 500.0;
+static const double MAXZ = 100.0;
+
 int main(int argc, char** argv) {
+    graph_data_t* p_data;
+    clock_t       c;
+    int           seed = time(NULL);
+    double        duration = 0.0;
+    
+    printf("Seed: %d\n", seed);
+    
     test_directed_graph_node_correctness();
     test_weight_function_correctness();
+    
+    c = clock();
+    p_data = create_random_graph(NODES, EDGES, MAXX, MAXY, MAXZ);
+    
+    duration += ((double) clock() - c);
+    printf("Built the graph in %f seconds.", duration / CLOCKS_PER_SEC);
     return (EXIT_SUCCESS);
 }
 
