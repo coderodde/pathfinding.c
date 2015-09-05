@@ -3,12 +3,23 @@
 
 #include "unordered_set.h"
 #include <stdbool.h>
+#include <string.h>
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
     typedef struct directed_graph_node_t directed_graph_node_t;
+    
+    /***************************************************************************
+    * The function for testing node equality.                                  *
+    ***************************************************************************/  
+    bool equals_function(void* a, void* b);
+    
+    /***************************************************************************
+    * The function for computing the hash values for nodes.                    *
+    ***************************************************************************/  
+    size_t hash_function(void* v);
     
     /***************************************************************************
     * Allocates a new directed graph node with given name.                     *

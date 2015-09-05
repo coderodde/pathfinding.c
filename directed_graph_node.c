@@ -14,37 +14,36 @@ static const size_t INITIAL_CAPACITY = 16;
 static const size_t MAXIMUM_NAME_STRING_LEN = 80;
 static const float  LOAD_FACTOR = 1.0f;
 
-static bool equals_function(void* a, void* b)
+bool equals_function(void* a, void* b)
 {
-    
     if (!a || !b) return false;
-    
+
     return strcmp(((directed_graph_node_t*) a)->p_name,
                   ((directed_graph_node_t*) b)->p_name) == 0;
 }
 
-static size_t hash_function(void* v) 
+size_t hash_function(void* v) 
 {
     size_t ret;
     size_t i;
     char* pc;
-    
+
     if (!v) return 0;
-    
+
     ret = 0;
     i = 1;
     pc = ((directed_graph_node_t*) v)->p_name;
-    
+
     while (*pc) 
     {
         ret += *pc * i;
         ++i;
         ++pc;
     }
-    
+
     return ret;
 }
-
+    
 directed_graph_node_t* directed_graph_node_t_alloc(char* name)
 {
     directed_graph_node_t* p_node = malloc(sizeof(*p_node));
@@ -162,20 +161,28 @@ void directed_graph_node_t_clear(directed_graph_node_t* p_node)
     
     while (unordered_set_iterator_t_has_next(p_iterator)) 
     {
-        unordered_set_iterator_t_next(p_iterator, p_tmp_node);
-        unordered_set_t_remove(p_tmp_node->p_parent_node_set, p_node);
+        unordered_set_iterator_t_next(p_iterator, &p_tmp_node);
+        
+        if (strcmp(p_node->p_name, p_tmp_node->p_name) != 0) 
+        {
+            unordered_set_t_remove(p_tmp_node->p_parent_node_set, p_node);
+        }
     }
     
     p_iterator = unordered_set_iterator_t_alloc(p_node->p_parent_node_set);
     
     while (unordered_set_iterator_t_has_next(p_iterator))
     {
-        unordered_set_iterator_t_next(p_iterator, p_tmp_node);
-        unordered_set_t_remove(p_tmp_node->p_child_node_set, p_node);
+        unordered_set_iterator_t_next(p_iterator, &p_tmp_node);
+        
+        if (strcmp(p_node->p_name, p_tmp_node->p_name) != 0) 
+        {
+            unordered_set_t_remove(p_tmp_node->p_child_node_set, p_node);
+        }
     }
     
-    unordered_set_t_clear(p_node->p_child_node_set);
     unordered_set_t_clear(p_node->p_parent_node_set);
+    unordered_set_t_clear(p_node->p_child_node_set);
 }
 
 void directed_graph_node_t_free(directed_graph_node_t* p_node) 

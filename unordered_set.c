@@ -281,7 +281,7 @@ void unordered_set_t_clear(unordered_set_t* p_set)
     if (!p_set) return;
 
     p_entry = p_set->p_head;
-
+    
     while (p_entry)
     {
         index = p_set->p_hash_function(p_entry->p_key) & p_set->mask;
@@ -290,7 +290,7 @@ void unordered_set_t_clear(unordered_set_t* p_set)
         p_entry = p_next_entry;
         p_set->p_table[index] = NULL;
     }
-
+    
     p_set->mod_count += p_set->size;
     p_set->size = 0;
     p_set->p_head = NULL;

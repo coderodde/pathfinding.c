@@ -181,7 +181,7 @@ void* list_t_pop_front(list_t* p_list)
     if (p_list->size == 0) return NULL;
 
     p_ret = p_list->p_table[p_list->head];
-    p_list->head++;
+    p_list->head = (p_list->head + 1) & p_list->mask;
     p_list->size--;
     return p_ret;
 }
@@ -222,7 +222,7 @@ void* list_t_remove_at(list_t* p_list, size_t index)
     if (elements_before < elements_after)
     {
         /* Move the preceding elements one position to the right. */
-        for (i = 0, j = elements_before; i < elements_before; ++i, --j)
+        for (j = elements_before; j > 0; --j)
         {
             p_list->p_table[(head + j) & mask] =
             p_list->p_table[(head + j - 1) & mask];
