@@ -162,7 +162,79 @@ static void test_weight_function_correctness()
 
 static void test_dijkstra_correctness()
 {
+    directed_graph_node_t* p_node_a;
+    directed_graph_node_t* p_node_b;
+    directed_graph_node_t* p_node_c;
+    directed_graph_node_t* p_node_d;
+    directed_graph_node_t* p_node_e;
+    directed_graph_node_t* p_node_s;
+    directed_graph_node_t* p_node_t;
     
+    directed_graph_weight_function_t* p_weight_function;
+    list_t* p_path;
+    
+    p_node_a = directed_graph_node_t_alloc("A");
+    p_node_b = directed_graph_node_t_alloc("B");
+    p_node_c = directed_graph_node_t_alloc("C");
+    p_node_d = directed_graph_node_t_alloc("D");
+    p_node_e = directed_graph_node_t_alloc("E");
+    p_node_s = directed_graph_node_t_alloc("Source");
+    p_node_t = directed_graph_node_t_alloc("Target");
+    
+    p_weight_function = directed_graph_weight_function_t_alloc(hash_function,
+                                                               equals_function);
+    
+    directed_graph_node_t_add_arc(p_node_s, p_node_a);
+    directed_graph_weight_function_t_put(p_weight_function,
+                                         p_node_s,
+                                         p_node_a,
+                                         1.0);
+    
+    directed_graph_node_t_add_arc(p_node_a, p_node_b);
+    directed_graph_weight_function_t_put(p_weight_function,
+                                         p_node_a,
+                                         p_node_b,
+                                         2.0);
+    
+    directed_graph_node_t_add_arc(p_node_b, p_node_c);
+    directed_graph_weight_function_t_put(p_weight_function,
+                                         p_node_b,
+                                         p_node_c,
+                                         3.0);
+    
+    directed_graph_node_t_add_arc(p_node_c, p_node_t);
+    directed_graph_weight_function_t_put(p_weight_function,
+                                         p_node_c,
+                                         p_node_t,
+                                         16.0);
+    
+    directed_graph_node_t_add_arc(p_node_s, p_node_d);
+    directed_graph_weight_function_t_put(p_weight_function,
+                                         p_node_s,
+                                         p_node_d,
+                                         11.0);
+    
+    directed_graph_node_t_add_arc(p_node_d, p_node_e);
+    directed_graph_weight_function_t_put(p_weight_function,
+                                         p_node_d,
+                                         p_node_e,
+                                         5.0);
+    
+    directed_graph_node_t_add_arc(p_node_e, p_node_t);
+    directed_graph_weight_function_t_put(p_weight_function,
+                                         p_node_e,
+                                         p_node_t,
+                                         6.0);
+    
+    directed_graph_node_t_add_arc(p_node_c, p_node_d);
+    directed_graph_weight_function_t_put(p_weight_function,
+                                         p_node_c,
+                                         p_node_d,
+                                         4.0);
+    
+    p_path = dijkstra(p_node_s, p_node_t, p_weight_function);
+    
+    printf("Path nodes: %d\n", list_t_size(p_path));
 }
 
 static const size_t NODES = 100;
@@ -186,6 +258,7 @@ int main(int argc, char** argv) {
     
     test_directed_graph_node_correctness();
     test_weight_function_correctness();
+    test_dijkstra_correctness();
     
     c = clock();
     p_data = create_random_graph(NODES, EDGES, MAXX, MAXY, MAXZ);

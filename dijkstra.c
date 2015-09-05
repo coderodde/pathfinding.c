@@ -5,6 +5,7 @@
 #include "unordered_map.h"
 #include "unordered_set.h"
 #include "heap.h"
+#include "utils.h"
 
 typedef struct weight_t {
     double weight;
@@ -37,7 +38,7 @@ list_t* dijkstra(directed_graph_node_t* p_source,
                  directed_graph_node_t* p_target,
                  directed_graph_weight_function_t* p_weight_function)
 {
-    list_t*                   p_path_list;
+    list_t*                   p_list;
     heap_t*                   p_open_set;
     unordered_set_t*          p_closed_set;
     unordered_map_t*          p_parent_map;
@@ -52,10 +53,6 @@ list_t* dijkstra(directed_graph_node_t* p_source,
     if (!p_target)          return NULL;
     if (!p_weight_function) return NULL;
     
-    p_path_list = list_t_alloc(INITIAL_CAPACITY);
-    
-    if (!p_path_list) return NULL;
-    
     p_open_set = heap_t_alloc(4,
                               INITIAL_CAPACITY,
                               LOAD_FACTOR,
@@ -65,7 +62,6 @@ list_t* dijkstra(directed_graph_node_t* p_source,
     
     if (!p_open_set) 
     {
-        list_t_free(p_path_list);
         return NULL;
     }
     
@@ -76,7 +72,6 @@ list_t* dijkstra(directed_graph_node_t* p_source,
     
     if (!p_closed_set) 
     {
-        list_t_free(p_path_list);
         heap_t_free(p_open_set);
         return NULL;
     }
@@ -88,7 +83,6 @@ list_t* dijkstra(directed_graph_node_t* p_source,
     
     if (!p_parent_map) 
     {
-        list_t_free(p_path_list);
         heap_t_free(p_open_set);
         unordered_set_t_free(p_closed_set);
         return NULL;
@@ -101,7 +95,6 @@ list_t* dijkstra(directed_graph_node_t* p_source,
     
     if (!p_cost_map)
     {
-        list_t_free(p_path_list);
         heap_t_free(p_open_set);
         unordered_set_t_free(p_closed_set);
         unordered_map_t_free(p_parent_map);
@@ -112,7 +105,6 @@ list_t* dijkstra(directed_graph_node_t* p_source,
     
     if (!p_weight_list) 
     {
-        list_t_free(p_path_list);
         heap_t_free(p_open_set);
         unordered_set_t_free(p_closed_set);
         unordered_map_t_free(p_parent_map);
@@ -135,7 +127,13 @@ list_t* dijkstra(directed_graph_node_t* p_source,
         if (equals_function(p_current, p_target)) 
         {
             puts("POOP BETWEEN TWO NODES! ^^");
-            return NULL;
+            
+            p_list = traceback_path(p_target, p_parent_map);
+            heap_t_free(p_open_set);
+            unordered_set_t_free(p_closed_set);
+            unordered_map_t_free(p_parent_map);
+            unordered_map_t_free(p_cost_map);
+            return p_list;
         }
         
         unordered_set_t_add(p_closed_set, p_current);
@@ -180,10 +178,17 @@ list_t* dijkstra(directed_graph_node_t* p_source,
                 unordered_map_t_put(p_cost_map, p_child, p_weight);
             }
         }
+        
+        unordered_set_iterator_t_free(p_child_iterator);
     }
     
     /* Once here, return a empty path in order to denote the fact that the 
        target node is not reachable from source node. */
     puts("NOPOOOP");
-    return p_path_list;
+    heap_t_free(p_open_set);
+    unordered_set_t_free(p_closed_set);
+    unordered_map_t_free(p_parent_map);
+    unordered_map_t_free(p_cost_map);
+    p_list = list_t_alloc(10);
+    return p_list;
 }
