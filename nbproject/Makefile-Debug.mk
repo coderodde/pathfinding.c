@@ -35,6 +35,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/astar.o \
 	${OBJECTDIR}/dijkstra.o \
 	${OBJECTDIR}/directed_graph_node.o \
 	${OBJECTDIR}/heap.o \
@@ -69,6 +70,11 @@ LDLIBSOPTIONS=
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/cpathfinding: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/cpathfinding ${OBJECTFILES} ${LDLIBSOPTIONS}
+
+${OBJECTDIR}/astar.o: astar.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/astar.o astar.c
 
 ${OBJECTDIR}/dijkstra.o: dijkstra.c 
 	${MKDIR} -p ${OBJECTDIR}

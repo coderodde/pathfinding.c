@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include "astar.h"
 #include "dijkstra.h"
 #include "directed_graph_node.h"
 #include "weight_function.h"
@@ -244,11 +245,12 @@ static void test_dijkstra_correctness()
     ASSERT(list_t_get(p_path, 6) == p_node_t);
 }
 
-static const size_t NODES = 20000;
-static const size_t EDGES = NODES * 4;
-static const double MAXX = 1000.0;
-static const double MAXY = 500.0;
-static const double MAXZ = 100.0;
+static const size_t NODES = 10000;
+static const size_t EDGES = NODES * 20;
+static const double MAXX = 10000.0;
+static const double MAXY = 10000.0;
+static const double MAXZ = 500.0;
+static const double MAX_DISTANCE = 2000.0;
 
 int main(int argc, char** argv) {
     graph_data_t* p_data;
@@ -269,7 +271,7 @@ int main(int argc, char** argv) {
     test_dijkstra_correctness();
     
     c = clock();
-    p_data = create_random_graph(NODES, EDGES, MAXX, MAXY, MAXZ);
+    p_data = create_random_graph(NODES, EDGES, MAXX, MAXY, MAXZ, MAX_DISTANCE);
     
     duration = ((double) clock() - c);
     printf("Built the graph in %f seconds.\n", duration / CLOCKS_PER_SEC);
@@ -280,6 +282,7 @@ int main(int argc, char** argv) {
     printf("Source: %s\n", directed_graph_node_t_to_string(p_source));
     printf("Target: %s\n", directed_graph_node_t_to_string(p_target));
     
+    /**** DIJKSTRA'S ALGORITHM ****/
     c = clock();
     
     p_path = dijkstra(p_source, p_target, p_data->p_weight_function);
@@ -297,6 +300,29 @@ int main(int argc, char** argv) {
     printf("Path is a valid path: %d\n", is_valid_path(p_path));
     printf("Path cost: %f\n", 
            compute_path_cost(p_path, p_data->p_weight_function));
+    
+    /**** ASTAR ALGORITHM ****/
+    c = clock();
+    
+    p_path = astar(p_source, 
+                   p_target, 
+                   p_data->p_weight_function, 
+                   p_data->p_point_map);
+    
+    duration = ((double) clock() - c);
+    
+    printf("A* algorithm in %f seconds.\n", duration / CLOCKS_PER_SEC);
+    printf("Path:\n");
+    
+    for (i = 0; i < list_t_size(p_path); ++i) 
+    {
+        puts(directed_graph_node_t_to_string(list_t_get(p_path, i)));
+    }
+    
+    printf("Path is a valid path: %d\n", is_valid_path(p_path));
+    printf("Path cost: %f\n", 
+           compute_path_cost(p_path, p_data->p_weight_function));
+    
     return (EXIT_SUCCESS);
 }
 

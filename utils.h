@@ -5,6 +5,7 @@
 #include "unordered_map.h"
 #include "weight_function.h"
 #include "list.h"
+#include "heap.h"
 
 #ifdef	__cplusplus
 extern "C" {
@@ -22,6 +23,27 @@ extern "C" {
         unordered_map_t*                  p_point_map;
     } graph_data_t;
 
+    typedef struct search_state_t {
+        list_t*          p_weight_list;
+        heap_t*          p_open_set;
+        unordered_set_t* p_closed_set;
+        unordered_map_t* p_parent_map;
+        unordered_map_t* p_cost_map;
+    } search_state_t;
+    
+    typedef struct weight_t {
+        double weight;
+    } weight_t;
+
+    int priority_cmp(void* pa, void* pb);
+    
+    static const size_t INITIAL_CAPACITY = 16;
+    static const float  LOAD_FACTOR = 1.0f;
+    
+    void search_state_t_alloc(search_state_t* p_state);
+    bool search_state_t_is_ready(search_state_t* p_state);
+    void search_state_t_free(search_state_t* p_state);
+    
     point_3d_t* random_point(double maxx, double maxy, double maxz);
 
     double point_3d_t_distance(point_3d_t* p_a, point_3d_t* p_b);
@@ -33,7 +55,8 @@ extern "C" {
                                       size_t edges,
                                       const double maxx,
                                       const double maxy,
-                                      const double maxz);
+                                      const double maxz,
+                                      const double max_distance);
 
     list_t* traceback_path(directed_graph_node_t* p_target,
                            unordered_map_t* p_parent_map);

@@ -26,6 +26,72 @@ double point_3d_t_distance(point_3d_t* p_a, point_3d_t* p_b)
     return sqrt(dx * dx + dy * dy + dz * dz);
 }
 
+int priority_cmp(void* pa, void* pb) 
+{
+    double da;
+    double db;
+
+    da = ((weight_t*) pa)->weight;
+    db = ((weight_t*) pb)->weight;
+
+    if (da < db) 
+    {
+        return -1;
+    }
+    else if (da > db) 
+    {
+        return 1;
+    }
+
+    return 0;
+}
+    
+void search_state_t_alloc(search_state_t* p_state) 
+{
+    if (!p_state) return;
+
+    p_state->p_weight_list = list_t_alloc(INITIAL_CAPACITY);
+    p_state->p_open_set    = heap_t_alloc(4, 
+                                          INITIAL_CAPACITY,
+                                          LOAD_FACTOR,
+                                          hash_function,
+                                          equals_function,
+                                          priority_cmp);
+
+    p_state->p_closed_set  = unordered_set_t_alloc(INITIAL_CAPACITY,
+                                                   LOAD_FACTOR,
+                                                   hash_function,
+                                                   equals_function);
+
+    p_state->p_parent_map  = unordered_map_t_alloc(INITIAL_CAPACITY,
+                                                   LOAD_FACTOR,
+                                                   hash_function,
+                                                   equals_function);
+
+    p_state->p_cost_map  = unordered_map_t_alloc(INITIAL_CAPACITY,
+                                                 LOAD_FACTOR,
+                                                 hash_function,
+                                                 equals_function);
+}
+
+bool search_state_t_is_ready(search_state_t* p_state) 
+{
+    return p_state->p_weight_list 
+            && p_state->p_open_set
+            && p_state->p_closed_set
+            && p_state->p_parent_map
+            && p_state->p_cost_map;
+}
+
+void search_state_t_free(search_state_t* p_state) 
+{
+    if (p_state->p_weight_list) list_t_free(p_state->p_weight_list);
+    if (p_state->p_open_set)    heap_t_free(p_state->p_open_set);
+    if (p_state->p_closed_set)  unordered_set_t_free(p_state->p_closed_set);
+    if (p_state->p_parent_map)  unordered_map_t_free(p_state->p_parent_map);
+    if (p_state->p_cost_map)    unordered_map_t_free(p_state->p_cost_map);
+}
+    
 directed_graph_node_t* choose(directed_graph_node_t** p_table,
                                      const size_t size)
 {
@@ -37,7 +103,8 @@ graph_data_t* create_random_graph(const size_t nodes,
                                   size_t edges,
                                   const double maxx,
                                   const double maxy,
-                                  const double maxz)
+                                  const double maxz,
+                                  const double max_distance)
 {
     size_t i;
     char* p_name;
@@ -49,7 +116,8 @@ graph_data_t* create_random_graph(const size_t nodes,
     point_3d_t*                         p_a;
     point_3d_t*                         p_b;
     graph_data_t*                       p_ret;
-
+    double                              distance;
+    
     p_ret = malloc(sizeof(*p_ret));
 
     if (!p_ret) return NULL;
@@ -88,7 +156,6 @@ graph_data_t* create_random_graph(const size_t nodes,
         p_name = malloc(sizeof(char) * 20);
         sprintf(p_name, "%d", i);
         p_node_array[i] = directed_graph_node_t_alloc(p_name);
-//        printf("%s\n", directed_graph_node_t_to_string(p_node_array[i]));
         unordered_map_t_put(p_point_map, 
                             p_node_array[i], 
                             random_point(maxx, maxy, maxz));
@@ -102,13 +169,20 @@ graph_data_t* create_random_graph(const size_t nodes,
         p_a = unordered_map_t_get(p_point_map, p_tail);
         p_b = unordered_map_t_get(p_point_map, p_head);
 
+        distance = point_3d_t_distance(p_a, p_b);
+        
+        if (distance >= max_distance) 
+        {
+            continue;
+        }
+        
         directed_graph_node_t_add_arc(p_tail, p_head);
 
         directed_graph_weight_function_t_put(
                 p_weight_function,
                 p_tail,
                 p_head,
-                1.2 * point_3d_t_distance(p_a, p_b));
+                1.01 * distance);
 
         --edges;
     }

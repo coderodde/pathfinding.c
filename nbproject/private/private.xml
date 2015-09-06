@@ -7,17 +7,17 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/rodionefremov/NetBeansProjects/CPathfinding/directed_graph_node.h</file>
             <file>file:/Users/rodionefremov/NetBeansProjects/CPathfinding/utils.h</file>
+            <file>file:/Users/rodionefremov/NetBeansProjects/CPathfinding/directed_graph_node.h</file>
             <file>file:/Users/rodionefremov/NetBeansProjects/CPathfinding/weight_function.c</file>
-            <file>file:/Users/rodionefremov/NetBeansProjects/CPathfinding/unordered_map.c</file>
             <file>file:/Users/rodionefremov/NetBeansProjects/CPathfinding/main.c</file>
             <file>file:/Users/rodionefremov/NetBeansProjects/CPathfinding/directed_graph_node.c</file>
-            <file>file:/Users/rodionefremov/NetBeansProjects/CPathfinding/unordered_set.c</file>
+            <file>file:/Users/rodionefremov/NetBeansProjects/CPathfinding/utils.c</file>
             <file>file:/Users/rodionefremov/NetBeansProjects/CPathfinding/dijkstra.h</file>
+            <file>file:/Users/rodionefremov/NetBeansProjects/CPathfinding/astar.c</file>
             <file>file:/Users/rodionefremov/NetBeansProjects/CPathfinding/weight_function.h</file>
             <file>file:/Users/rodionefremov/NetBeansProjects/CPathfinding/dijkstra.c</file>
-            <file>file:/Users/rodionefremov/NetBeansProjects/CPathfinding/unordered_map.h</file>
+            <file>file:/Users/rodionefremov/NetBeansProjects/CPathfinding/astar.h</file>
         </group>
     </open-files>
 </project-private>
