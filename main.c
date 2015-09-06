@@ -3,6 +3,7 @@
 #include <time.h>
 #include "astar.h"
 #include "dijkstra.h"
+#include "bidir_dijkstra.h"
 #include "directed_graph_node.h"
 #include "weight_function.h"
 #include "utils.h"
@@ -245,17 +246,109 @@ static void test_dijkstra_correctness()
     ASSERT(list_t_get(p_path, 6) == p_node_t);
 }
 
+static void test_bidirectional_dijkstra_correctness()
+{   
+    directed_graph_node_t* p_node_a;
+    directed_graph_node_t* p_node_b;
+    directed_graph_node_t* p_node_c;
+    directed_graph_node_t* p_node_d;
+    directed_graph_node_t* p_node_e;
+    directed_graph_node_t* p_node_s;
+    directed_graph_node_t* p_node_t;
+    
+    directed_graph_weight_function_t* p_weight_function;
+    list_t* p_path;
+    
+    p_node_a = directed_graph_node_t_alloc("A");
+    p_node_b = directed_graph_node_t_alloc("B");
+    p_node_c = directed_graph_node_t_alloc("C");
+    p_node_d = directed_graph_node_t_alloc("D");
+    p_node_e = directed_graph_node_t_alloc("E");
+    p_node_s = directed_graph_node_t_alloc("Source");
+    p_node_t = directed_graph_node_t_alloc("Target");
+    
+    p_weight_function = directed_graph_weight_function_t_alloc(hash_function,
+                                                               equals_function);
+    
+    directed_graph_node_t_add_arc(p_node_s, p_node_a);
+    directed_graph_weight_function_t_put(p_weight_function,
+                                         p_node_s,
+                                         p_node_a,
+                                         1.0);
+    
+    directed_graph_node_t_add_arc(p_node_a, p_node_b);
+    directed_graph_weight_function_t_put(p_weight_function,
+                                         p_node_a,
+                                         p_node_b,
+                                         2.0);
+    
+    directed_graph_node_t_add_arc(p_node_b, p_node_c);
+    directed_graph_weight_function_t_put(p_weight_function,
+                                         p_node_b,
+                                         p_node_c,
+                                         3.0);
+    
+    directed_graph_node_t_add_arc(p_node_c, p_node_t);
+    directed_graph_weight_function_t_put(p_weight_function,
+                                         p_node_c,
+                                         p_node_t,
+                                         16.0);
+    
+    directed_graph_node_t_add_arc(p_node_s, p_node_d);
+    directed_graph_weight_function_t_put(p_weight_function,
+                                         p_node_s,
+                                         p_node_d,
+                                         11.0);
+    
+    directed_graph_node_t_add_arc(p_node_d, p_node_e);
+    directed_graph_weight_function_t_put(p_weight_function,
+                                         p_node_d,
+                                         p_node_e,
+                                         5.0);
+    
+    directed_graph_node_t_add_arc(p_node_e, p_node_t);
+    directed_graph_weight_function_t_put(p_weight_function,
+                                         p_node_e,
+                                         p_node_t,
+                                         6.0);
+    
+    directed_graph_node_t_add_arc(p_node_c, p_node_d);
+    directed_graph_weight_function_t_put(p_weight_function,
+                                         p_node_c,
+                                         p_node_d,
+                                         4.0);
+    
+    p_path = bidirectional_dijkstra(p_node_s, p_node_t, p_weight_function);
+    
+    ASSERT(list_t_size(p_path) == 7);
+    ASSERT(list_t_get(p_path, 0) == p_node_s);
+    ASSERT(list_t_get(p_path, 1) == p_node_a);
+    ASSERT(list_t_get(p_path, 2) == p_node_b);
+    ASSERT(list_t_get(p_path, 3) == p_node_c);
+    ASSERT(list_t_get(p_path, 4) == p_node_d);
+    ASSERT(list_t_get(p_path, 5) == p_node_e);
+    ASSERT(list_t_get(p_path, 6) == p_node_t);
+    
+    p_path = bidirectional_dijkstra(p_node_b, p_node_a, p_weight_function);
+    
+    ASSERT(list_t_size(p_path) == 0);
+    
+    p_path = bidirectional_dijkstra(p_node_b, p_node_b, p_weight_function);
+    
+    ASSERT(list_t_size(p_path) == 1);
+}
+
 static const size_t NODES = 10000;
-static const size_t EDGES = NODES * 20;
+static const size_t EDGES = NODES * 5;
 static const double MAXX = 10000.0;
 static const double MAXY = 10000.0;
 static const double MAXZ = 500.0;
-static const double MAX_DISTANCE = 2000.0;
+static const double MAX_DISTANCE = 1500.0;
 
 int main(int argc, char** argv) {
     graph_data_t* p_data;
     clock_t       c;
-    int           seed = time(NULL);
+    int           seed = 1441525665; time(NULL);
     double        duration;
     list_t*       p_path;
     size_t        i;
@@ -269,6 +362,7 @@ int main(int argc, char** argv) {
     test_directed_graph_node_correctness();
     test_weight_function_correctness();
     test_dijkstra_correctness();
+    test_bidirectional_dijkstra_correctness();
     
     c = clock();
     p_data = create_random_graph(NODES, EDGES, MAXX, MAXY, MAXZ, MAX_DISTANCE);
@@ -312,6 +406,29 @@ int main(int argc, char** argv) {
     duration = ((double) clock() - c);
     
     printf("A* algorithm in %f seconds.\n", duration / CLOCKS_PER_SEC);
+    printf("Path:\n");
+    
+    for (i = 0; i < list_t_size(p_path); ++i) 
+    {
+        puts(directed_graph_node_t_to_string(list_t_get(p_path, i)));
+    }
+    
+    printf("Path is a valid path: %d\n", is_valid_path(p_path));
+    printf("Path cost: %f\n", 
+           compute_path_cost(p_path, p_data->p_weight_function));
+    
+    /**** BIDIRECTIONAL DIJKSTRA'S ALGORITHM ****/
+    c = clock();
+    
+    p_path = bidirectional_dijkstra(p_source, 
+                                    p_target, 
+                                    p_data->p_weight_function);
+    
+    duration = ((double) clock() - c);
+    
+    printf("Bidirectional Dijkstra's algorithm in %f seconds.\n", 
+           duration / CLOCKS_PER_SEC);
+    
     printf("Path:\n");
     
     for (i = 0; i < list_t_size(p_path); ++i) 

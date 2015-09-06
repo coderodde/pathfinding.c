@@ -218,6 +218,40 @@ list_t* traceback_path(directed_graph_node_t* p_target,
     return p_ret;
 }
 
+list_t* traceback_bidirectional_path(directed_graph_node_t* p_middle_node,
+                                     unordered_map_t* p_parent_map_a,
+                                     unordered_map_t* p_parent_map_b)
+{
+    list_t* p_ret;
+    directed_graph_node_t* p_current;
+    
+    if (!p_middle_node)  return NULL;
+    if (!p_parent_map_a) return NULL;
+    if (!p_parent_map_b) return NULL;
+    
+    p_ret = list_t_alloc(INITIAL_CAPACITY);
+    
+    if (!p_ret) return NULL;
+    
+    p_current = p_middle_node;
+    
+    while (p_current) 
+    {
+        list_t_push_front(p_ret, p_current);
+        p_current = unordered_map_t_get(p_parent_map_a, p_current);
+    }
+    
+    p_current = unordered_map_t_get(p_parent_map_b, p_middle_node);
+    
+    while (p_current)
+    {
+        list_t_push_back(p_ret, p_current);
+        p_current = unordered_map_t_get(p_parent_map_b, p_current);
+    }
+    
+    return p_ret;
+}
+
 bool is_valid_path(list_t* p_path)
 {
     size_t i;

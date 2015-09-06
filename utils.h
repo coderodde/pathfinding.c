@@ -61,6 +61,10 @@ extern "C" {
     list_t* traceback_path(directed_graph_node_t* p_target,
                            unordered_map_t* p_parent_map);
 
+    list_t* traceback_bidirectional_path(directed_graph_node_t* p_middle_node,
+                                         unordered_map_t* p_parent_map_a,
+                                         unordered_map_t* p_parent_map_b);
+    
     bool is_valid_path(list_t* p_path);
 
     double compute_path_cost(
