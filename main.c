@@ -3,6 +3,7 @@
 #include <time.h>
 #include "astar.h"
 #include "dijkstra.h"
+#include "bidir_astar.h"
 #include "bidir_dijkstra.h"
 #include "directed_graph_node.h"
 #include "weight_function.h"
@@ -338,17 +339,17 @@ static void test_bidirectional_dijkstra_correctness()
     ASSERT(list_t_size(p_path) == 1);
 }
 
-static const size_t NODES = 10000;
-static const size_t EDGES = NODES * 5;
+static const size_t NODES = 20000;
+static const size_t EDGES = NODES * 9;
 static const double MAXX = 10000.0;
 static const double MAXY = 10000.0;
-static const double MAXZ = 500.0;
-static const double MAX_DISTANCE = 1500.0;
+static const double MAXZ = 200.0;
+static const double MAX_DISTANCE = 800.0;
 
 int main(int argc, char** argv) {
     graph_data_t* p_data;
     clock_t       c;
-    int           seed = 1441525665; time(NULL);
+    int           seed = time(NULL);
     double        duration;
     list_t*       p_path;
     size_t        i;
@@ -427,6 +428,30 @@ int main(int argc, char** argv) {
     duration = ((double) clock() - c);
     
     printf("Bidirectional Dijkstra's algorithm in %f seconds.\n", 
+           duration / CLOCKS_PER_SEC);
+    
+    printf("Path:\n");
+    
+    for (i = 0; i < list_t_size(p_path); ++i) 
+    {
+        puts(directed_graph_node_t_to_string(list_t_get(p_path, i)));
+    }
+    
+    printf("Path is a valid path: %d\n", is_valid_path(p_path));
+    printf("Path cost: %f\n", 
+           compute_path_cost(p_path, p_data->p_weight_function));
+    
+    /**** BIDIRECTIONAL ASTAR ALGORITHM ****/
+    c = clock();
+    
+    p_path = bidirectional_astar(p_source, 
+                                 p_target, 
+                                 p_data->p_weight_function,
+                                 p_data->p_point_map);
+    
+    duration = ((double) clock() - c);
+    
+    printf("Bidirectional A* algorithm in %f seconds.\n", 
            duration / CLOCKS_PER_SEC);
     
     printf("Path:\n");

@@ -36,6 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/astar.o \
+	${OBJECTDIR}/bidir_astar.o \
 	${OBJECTDIR}/bidir_dijkstra.o \
 	${OBJECTDIR}/dijkstra.o \
 	${OBJECTDIR}/directed_graph_node.o \
@@ -76,6 +77,11 @@ ${OBJECTDIR}/astar.o: astar.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/astar.o astar.c
+
+${OBJECTDIR}/bidir_astar.o: bidir_astar.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/bidir_astar.o bidir_astar.c
 
 ${OBJECTDIR}/bidir_dijkstra.o: bidir_dijkstra.c 
 	${MKDIR} -p ${OBJECTDIR}

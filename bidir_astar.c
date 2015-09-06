@@ -15,10 +15,25 @@ static void free_weight_list(list_t* p_list)
     }
 }
 
-list_t* bidirectional_dijkstra(directed_graph_node_t* p_source,
-                               directed_graph_node_t* p_target,
-                               directed_graph_weight_function_t* 
-                                                      p_weight_function)
+static double heuristic_cost(unordered_map_t* p_location_map,
+                             directed_graph_node_t* p_node_a,
+                             directed_graph_node_t* p_node_b)
+{
+    point_3d_t* p_point_a = unordered_map_t_get(p_location_map, p_node_a);
+    point_3d_t* p_point_b = unordered_map_t_get(p_location_map, p_node_b);
+    return point_3d_t_distance(p_point_a, p_point_b);
+}
+
+static double maxd(double a, double b) 
+{
+    return a > b ? a : b;
+}
+
+list_t* bidirectional_astar(directed_graph_node_t* p_source,
+                            directed_graph_node_t* p_target,
+                            directed_graph_weight_function_t* 
+                                                   p_weight_function,
+                            unordered_map_t* p_location_map)
 {
     if (equals_function(p_source, p_target))
     {
@@ -107,25 +122,29 @@ list_t* bidirectional_dijkstra(directed_graph_node_t* p_source,
     
     while (heap_t_size(p_open_set_a) > 0 && heap_t_size(p_open_set_b) > 0) 
     {
-        double top_a_cost = 
-        ((weight_t*) unordered_map_t_get(p_cost_map_a, 
-                                         heap_t_min(p_open_set_a)))->weight;
-        
-        double top_b_cost =
-        ((weight_t*) unordered_map_t_get(p_cost_map_b,
-                                         heap_t_min(p_open_set_b)))->weight;
-        
-        double top_sum = top_a_cost + top_b_cost;
-        
-        if (top_sum > best_path_cost)
+        if (p_touch_node)
         {
-            list_t* p_path = traceback_bidirectional_path(p_touch_node,
-                                                          p_parent_map_a,
-                                                          p_parent_map_b);
-            free_weight_list(p_weight_list);
-            search_state_t_free(&forward_search_state);
-            search_state_t_free(&backward_search_state);
-            return p_path;
+            directed_graph_node_t* p_min_a = heap_t_min(p_open_set_a);
+            directed_graph_node_t* p_min_b = heap_t_min(p_open_set_b);
+            
+            double cost_a = ((weight_t*) 
+                            unordered_map_t_get(p_cost_map_a, p_min_a))->weight + 
+                            heuristic_cost(p_location_map, p_min_a, p_target);
+            
+            double cost_b = ((weight_t*)
+                            unordered_map_t_get(p_cost_map_b, p_min_b))->weight +
+                            heuristic_cost(p_location_map, p_min_b, p_source);
+            
+            if (best_path_cost < maxd(cost_a, cost_b))
+            {
+                list_t* p_path = traceback_bidirectional_path(p_touch_node,
+                                                              p_parent_map_a,
+                                                              p_parent_map_b);
+                free_weight_list(p_weight_list);
+                search_state_t_free(&forward_search_state);
+                search_state_t_free(&backward_search_state);
+                return p_path;
+            }
         }
         
         if (heap_t_size(p_open_set_a) <= heap_t_size(p_open_set_b))
@@ -158,10 +177,18 @@ list_t* bidirectional_dijkstra(directed_graph_node_t* p_source,
                 if (!unordered_map_t_contains_key(p_cost_map_a, p_child)) 
                 {
                     p_weight = malloc(sizeof(*p_weight));
-                    p_weight->weight = tmp_g_score;
+                    p_weight->weight = tmp_g_score + 
+                                       heuristic_cost(p_location_map,
+                                                      p_child,
+                                                      p_target);
                     
                     list_t_push_back(p_weight_list, p_weight);
                     heap_t_add(p_open_set_a, p_child, p_weight);
+                    
+                    p_weight = malloc(sizeof(*p_weight));
+                    p_weight->weight = tmp_g_score;
+                    
+                    list_t_push_back(p_weight_list, p_weight);
                     unordered_map_t_put(p_cost_map_a, p_child, p_weight);
                     unordered_map_t_put(p_parent_map_a, p_child, p_current);
                     
@@ -187,10 +214,18 @@ list_t* bidirectional_dijkstra(directed_graph_node_t* p_source,
                     if (old_score > tmp_g_score)
                     {
                         p_weight = malloc(sizeof(*p_weight));
-                        p_weight->weight = tmp_g_score;
+                        p_weight->weight = tmp_g_score +
+                                           heuristic_cost(p_location_map,
+                                                          p_child,
+                                                          p_target);
                         
                         list_t_push_back(p_weight_list, p_weight);
                         heap_t_decrease_key(p_open_set_a, p_child, p_weight);
+                        
+                        p_weight = malloc(sizeof(*p_weight));
+                        p_weight->weight = tmp_g_score;
+                        
+                        list_t_push_back(p_weight_list, p_weight);
                         unordered_map_t_put(p_cost_map_a, p_child, p_weight);
                         unordered_map_t_put(p_parent_map_a, p_child, p_current);
                         
@@ -240,10 +275,17 @@ list_t* bidirectional_dijkstra(directed_graph_node_t* p_source,
                 if (!unordered_map_t_contains_key(p_cost_map_b, p_parent)) 
                 {
                     p_weight = malloc(sizeof(*p_weight));
-                    p_weight->weight = tmp_g_score;
+                    p_weight->weight = tmp_g_score +
+                                       heuristic_cost(p_location_map,
+                                                      p_parent,
+                                                      p_source);
                     
                     list_t_push_back(p_weight_list, p_weight);
                     heap_t_add(p_open_set_b, p_parent, p_weight);
+                    
+                    p_weight = malloc(sizeof(*p_weight));
+                    p_weight->weight = tmp_g_score;
+                    
                     unordered_map_t_put(p_cost_map_b, p_parent, p_weight);
                     unordered_map_t_put(p_parent_map_b, p_parent, p_current);
                     
@@ -269,10 +311,17 @@ list_t* bidirectional_dijkstra(directed_graph_node_t* p_source,
                     if (old_score > tmp_g_score)
                     {
                         p_weight = malloc(sizeof(*p_weight));
-                        p_weight->weight = tmp_g_score;
+                        p_weight->weight = tmp_g_score +
+                                           heuristic_cost(p_location_map,
+                                                          p_parent,
+                                                          p_source);
                         
                         list_t_push_back(p_weight_list, p_weight);
                         heap_t_decrease_key(p_open_set_b, p_parent, p_weight);
+                        
+                        p_weight = malloc(sizeof(*p_weight));
+                        p_weight->weight = tmp_g_score;
+                        
                         unordered_map_t_put(p_cost_map_b, p_parent, p_weight);
                         unordered_map_t_put(p_parent_map_b, p_parent, p_current);
                         

@@ -182,7 +182,7 @@ graph_data_t* create_random_graph(const size_t nodes,
                 p_weight_function,
                 p_tail,
                 p_head,
-                1.01 * distance);
+                1.5 * distance);
 
         --edges;
     }
